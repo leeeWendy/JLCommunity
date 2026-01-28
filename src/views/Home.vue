@@ -1,29 +1,30 @@
 <template>
   <div class="home">
-    <section class="models-section">
-      <div class="models-container">
-        <div class="models-grid">
-          <div 
-            v-for="(model, index) in models" 
+    <section class="web-section">
+      <div class="web-container">
+        <div class="web-grid">
+          <router-link 
+            v-for="(web, index) in webItems" 
             :key="index"
-            class="model-card"
-            @mouseenter="hoveredModel = index"
-            @mouseleave="hoveredModel = null"
+            :to="web.path"
+            class="web-card"
+            @mouseenter="hoveredWeb = index"
+            @mouseleave="hoveredWeb = null"
           >
-            <div class="model-card-inner">
-              <div class="model-preview">
-                <ModelViewer :model-name="model.name" :size="modelSize" :auto-rotate="true" />
+            <div class="web-card-inner">
+              <div class="web-preview">
+                <span class="web-icon">{{ web.icon }}</span>
               </div>
             </div>
-          </div>
+          </router-link>
         </div>
       </div>
       
       <!-- 悬浮的信息显示控件 -->
-      <div v-if="hoveredModel !== null" class="model-info-overlay">
-        <div class="model-info-content">
-          <h3 class="model-info-name">{{ models[hoveredModel].name }}</h3>
-          <p class="model-info-description">{{ models[hoveredModel].description }}</p>
+      <div v-if="hoveredWeb !== null" class="web-info-overlay">
+        <div class="web-info-content">
+          <h3 class="web-info-name">{{ webItems[hoveredWeb].name }}</h3>
+          <p class="web-info-description">{{ webItems[hoveredWeb].description }}</p>
         </div>
       </div>
     </section>
@@ -32,7 +33,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import ModelViewer from '../components/ModelViewer.vue'
 
 // 窗口宽度响应式
 const windowWidth = ref(window.innerWidth)
@@ -50,50 +50,54 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
 
-// 计算模型大小，根据窗口宽度动态调整
-const modelSize = computed(() => {
+// 计算图标大小，根据窗口宽度动态调整
+const iconSize = computed(() => {
   // 基础大小
-  let baseSize = 150
+  let baseSize = 80
   
   // 根据窗口宽度调整
   if (windowWidth.value < 480) {
-    baseSize = 80
+    baseSize = 50
   } else if (windowWidth.value < 768) {
-    baseSize = 100
+    baseSize = 60
   } else if (windowWidth.value < 992) {
-    baseSize = 120
+    baseSize = 70
   } else if (windowWidth.value < 1200) {
-    baseSize = 130
+    baseSize = 75
   }
   
   return baseSize
 })
 
-// 模型数据
-const models = ref([
+// 网页图标数据
+const webItems = ref([
   {
-    name: '奥斯卡奖杯',
-    description: '金色的奥斯卡奖杯模型，象征着电影界的最高荣誉',
-    url: ''
+    name: 'AIGC设计',
+    description: '人工智能生成内容设计平台，提供创意设计、图像生成等服务',
+    path: '/aigc',
+    icon: '🎨'
   },
   {
-    name: '鞋',
-    description: '时尚的运动鞋模型，展示了现代 footwear 设计',
-    url: ''
+    name: '摄影航拍',
+    description: '专业摄影与航拍服务，捕捉精彩瞬间，展现独特视角',
+    path: '/photography-aerial',
+    icon: '📸'
   },
   {
-    name: '机械',
-    description: '精密的机械装置模型，展示了工业设计的美感',
-    url: ''
+    name: 'AI短视频',
+    description: '人工智能短视频制作平台，快速生成高质量视频内容',
+    path: '/ai-short-video',
+    icon: '🎬'
   },
   {
-    name: '一棵树',
-    description: '茂盛的树木模型，象征着自然与生命的力量',
-    url: ''
+    name: '虚拟社区',
+    description: '沉浸式虚拟社区体验，连接全球用户，共享创意与灵感',
+    path: '/virtual-community',
+    icon: '🌐'
   }
 ])
 
-const hoveredModel = ref(null)
+const hoveredWeb = ref(null)
 </script>
 
 <style scoped>
@@ -103,12 +107,12 @@ const hoveredModel = ref(null)
   padding: 40px 20px;
 }
 
-.models-section {
+.web-section {
   margin-bottom: 150px;
   position: relative;
 }
 
-.models-container {
+.web-container {
   position: relative;
   background: var(--card-bg);
   backdrop-filter: blur(25px);
@@ -120,7 +124,7 @@ const hoveredModel = ref(null)
   border: 1px solid var(--border-color);
 }
 
-.models-grid {
+.web-grid {
   display: flex;
   gap: 15px;
   margin-bottom: 30px;
@@ -128,20 +132,21 @@ const hoveredModel = ref(null)
   height: 100%;
 }
 
-.model-card {
+.web-card {
   flex: 1;
   min-width: 0;
   position: relative;
   cursor: pointer;
   transition: all 0.3s ease;
   height: 100%;
+  text-decoration: none;
 }
 
-.model-card:hover {
+.web-card:hover {
   transform: translateY(-10px);
 }
 
-.model-card-inner {
+.web-card-inner {
   position: relative;
   background: var(--card-bg);
   backdrop-filter: blur(20px);
@@ -154,7 +159,7 @@ const hoveredModel = ref(null)
   border: 1px solid var(--border-color);
 }
 
-.model-card:hover .model-card-inner {
+.web-card:hover .web-card-inner {
   background: var(--card-bg);
   box-shadow: 
     0 15px 50px var(--primary-glow),
@@ -162,7 +167,7 @@ const hoveredModel = ref(null)
   border-color: var(--border-color);
 }
 
-.model-preview {
+.web-preview {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -171,21 +176,16 @@ const hoveredModel = ref(null)
   flex: 1;
 }
 
-.hyper3d-badge {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: var(--primary-gradient);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-  box-shadow: 0 4px 12px var(--primary-glow);
-  z-index: 2;
+.web-icon {
+  font-size: 80px;
+  transition: transform 0.3s ease;
 }
 
-.model-info-overlay {
+.web-card:hover .web-icon {
+  transform: scale(1.1);
+}
+
+.web-info-overlay {
   position: absolute;
   bottom: -100px;
   left: 0;
@@ -214,11 +214,11 @@ const hoveredModel = ref(null)
   }
 }
 
-.model-info-content {
+.web-info-content {
   width: 100%;
 }
 
-.model-info-name {
+.web-info-name {
   font-size: 24px;
   font-weight: bold;
   color: #ffffff;
@@ -226,144 +226,130 @@ const hoveredModel = ref(null)
   text-shadow: 0 0 10px var(--primary-glow);
 }
 
-.model-info-description {
+.web-info-description {
   font-size: 16px;
   color: rgba(255, 255, 255, 0.8);
   line-height: 1.6;
   margin-bottom: 20px;
 }
 
-.model-info-hyper3d {
-  display: inline-block;
-}
-
-.hyper3d-tag {
-  background: var(--primary-glow);
-  border: 1px solid var(--border-color);
-  color: #ffffff;
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.hyper3d-tag:hover {
-  background: var(--primary-glow);
-  border-color: var(--border-color);
-}
-
 @media (max-width: 1200px) {
-  .models-container {
+  .web-container {
     padding: 25px;
   }
   
-  .models-grid {
+  .web-grid {
     gap: 12px;
   }
   
-  .model-preview {
+  .web-preview {
     padding: 18px;
   }
   
-  .model-info-overlay {
+  .web-icon {
+    font-size: 75px;
+  }
+  
+  .web-info-overlay {
     padding: 18px;
   }
   
-  .model-info-name {
+  .web-info-name {
     font-size: 19px;
   }
   
-  .model-info-description {
+  .web-info-description {
     font-size: 14px;
   }
 }
 
 @media (max-width: 992px) {
-  .models-container {
+  .web-container {
     padding: 20px;
   }
   
-  .models-grid {
+  .web-grid {
     gap: 10px;
   }
   
-  .model-preview {
+  .web-preview {
     padding: 15px;
   }
   
-  .model-info-overlay {
+  .web-icon {
+    font-size: 70px;
+  }
+  
+  .web-info-overlay {
     padding: 15px;
   }
   
-  .model-info-name {
+  .web-info-name {
     font-size: 17px;
   }
   
-  .model-info-description {
+  .web-info-description {
     font-size: 13px;
   }
 }
 
 @media (max-width: 768px) {
-  .models-container {
+  .web-container {
     padding: 18px 15px;
   }
   
-  .models-grid {
+  .web-grid {
     gap: 8px;
   }
   
-  .model-preview {
+  .web-preview {
     padding: 12px;
   }
   
-  .model-info-overlay {
+  .web-icon {
+    font-size: 60px;
+  }
+  
+  .web-info-overlay {
     padding: 12px;
   }
   
-  .model-info-name {
+  .web-info-name {
     font-size: 15px;
   }
   
-  .model-info-description {
+  .web-info-description {
     font-size: 12px;
-  }
-  
-  .hyper3d-badge {
-    font-size: 10px;
-    padding: 5px 10px;
   }
 }
 
 @media (max-width: 480px) {
-  .models-container {
+  .web-container {
     padding: 15px 10px;
   }
   
-  .models-grid {
+  .web-grid {
     gap: 6px;
   }
   
-  .model-preview {
+  .web-preview {
     padding: 10px;
   }
   
-  .model-info-overlay {
+  .web-icon {
+    font-size: 50px;
+  }
+  
+  .web-info-overlay {
     padding: 10px;
   }
   
-  .model-info-name {
+  .web-info-name {
     font-size: 14px;
   }
   
-  .model-info-description {
+  .web-info-description {
     font-size: 11px;
-  }
-  
-  .hyper3d-badge {
-    font-size: 8px;
-    padding: 4px 8px;
   }
 }
 </style>

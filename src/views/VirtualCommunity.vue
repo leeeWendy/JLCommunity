@@ -126,7 +126,7 @@ const initThreeScene = () => {
     0.1,
     1000
   )
-  camera.position.set(0, 2, 5)
+  camera.position.set(12, 3, 15)
   
   renderer = new THREE.WebGLRenderer({ antialias: true })
   renderer.setSize(threeCanvas.value.clientWidth, threeCanvas.value.clientHeight)
@@ -383,12 +383,12 @@ const createCharacter = () => {
   const bodyGeometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 8)
   const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xFFD700 })
   const body = new THREE.Mesh(bodyGeometry, bodyMaterial)
-  body.position.set(0, 1, 0)
+  body.position.set(10, 1, 10)
   
   const headGeometry = new THREE.SphereGeometry(0.4)
   const headMaterial = new THREE.MeshStandardMaterial({ color: 0xFFCC99 })
   const head = new THREE.Mesh(headGeometry, headMaterial)
-  head.position.set(0, 2.4, 0)
+  head.position.set(10, 2.4, 10)
   
   scene.add(body)
   scene.add(head)
@@ -396,7 +396,7 @@ const createCharacter = () => {
   character = {
     body,
     head,
-    position: { x: 0, y: 0, z: 0 },
+    position: { x: 10, y: 0, z: 10 },
     speed: 0.1
   }
 }

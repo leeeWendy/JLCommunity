@@ -7,27 +7,64 @@
     
     <header class="header">
       <div class="logo">
-        <div class="logo-container">
-          <span class="logo-text">聚灵OPC社区</span>
-          <div class="logo-glow"></div>
-        </div>
-        <div class="logo-slogan">
-          <span class="slogan-chinese">汇聚智慧 灵动创新</span>
-        </div>
+        <router-link to="/" class="logo-link">
+          <div class="logo-container">
+            <span class="logo-text">聚灵OPC社区</span>
+            <div class="logo-glow"></div>
+          </div>
+          <div class="logo-slogan">
+            <span class="slogan-chinese">汇聚智慧 灵动创新</span>
+          </div>
+        </router-link>
       </div>
       <div class="header-center">
         <nav class="nav">
-          <router-link to="/" class="nav-link">
-            <div class="nav-link-inner">
-              <span class="nav-icon">🏠</span>
-              <span class="nav-text">首页</span>
-              <div class="nav-link-glow"></div>
-            </div>
-          </router-link>
           <router-link to="/assets" class="nav-link">
             <div class="nav-link-inner">
               <span class="nav-icon">📺</span>
               <span class="nav-text">三维资产</span>
+              <div class="nav-link-glow"></div>
+            </div>
+          </router-link>
+          <router-link to="/aigc" class="nav-link">
+            <div class="nav-link-inner">
+              <span class="nav-icon">🎨</span>
+              <span class="nav-text">AIGC设计</span>
+              <div class="nav-link-glow"></div>
+            </div>
+          </router-link>
+          <router-link to="/photography-aerial" class="nav-link">
+            <div class="nav-link-inner">
+              <span class="nav-icon">📸</span>
+              <span class="nav-text">摄影航拍</span>
+              <div class="nav-link-glow"></div>
+            </div>
+          </router-link>
+          <router-link to="/ai-short-video" class="nav-link">
+            <div class="nav-link-inner">
+              <span class="nav-icon">🎬</span>
+              <span class="nav-text">AI短视频</span>
+              <div class="nav-link-glow"></div>
+            </div>
+          </router-link>
+          <router-link to="/map-capture" class="nav-link">
+            <div class="nav-link-inner">
+              <span class="nav-icon">🗺️</span>
+              <span class="nav-text">地图采集</span>
+              <div class="nav-link-glow"></div>
+            </div>
+          </router-link>
+          <router-link to="/virtual-community" class="nav-link">
+            <div class="nav-link-inner">
+              <span class="nav-icon">🌐</span>
+              <span class="nav-text">虚拟社区</span>
+              <div class="nav-link-glow"></div>
+            </div>
+          </router-link>
+          <router-link to="/collection" class="nav-link">
+            <div class="nav-link-inner">
+              <span class="nav-icon">⭐</span>
+              <span class="nav-text">产品收藏</span>
               <div class="nav-link-glow"></div>
             </div>
           </router-link>
@@ -268,6 +305,18 @@ body {
 .logo {
   display: flex;
   flex-direction: column;
+}
+
+.logo-link {
+  text-decoration: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+}
+
+.logo-link:hover {
+  transform: scale(1.02);
 }
 
 .logo-container {
