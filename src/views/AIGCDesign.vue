@@ -40,18 +40,23 @@
     <section class="aigc-showcase">
       <h2 class="showcase-title">设计作品展示</h2>
       <div class="showcase-grid">
-        <div class="design-card" v-for="(design, index) in designs" :key="index">
-          <div class="design-preview">
-            <img :src="design.image" :alt="design.title" class="design-image">
-          </div>
-          <div class="design-info">
-            <h3 class="design-title">{{ design.title }}</h3>
-            <p class="design-description">{{ design.description }}</p>
-            <div class="design-tags">
-              <span class="tag" v-for="(tag, tagIndex) in design.tags" :key="tagIndex">{{ tag }}</span>
+        <div 
+            class="design-card" 
+            v-for="(design, index) in designs" 
+            :key="design.id"
+            @click="navigateToDetail(design.id)"
+          >
+            <div class="design-preview">
+              <img :src="design.image" :alt="design.title" class="design-image">
+            </div>
+            <div class="design-info">
+              <h3 class="design-title">{{ design.title }}</h3>
+              <p class="design-description">{{ design.description }}</p>
+              <div class="design-tags">
+                <span class="tag" v-for="(tag, tagIndex) in design.tags" :key="tagIndex">{{ tag }}</span>
+              </div>
             </div>
           </div>
-        </div>
       </div>
     </section>
 
@@ -70,40 +75,54 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// 导航到详情页
+const navigateToDetail = (id) => {
+  router.push(`/aigc/design/${id}`)
+}
 
 // 设计作品数据
 const designs = ref([
   {
+    id: 1,
     title: '未来科技风格UI设计',
     description: '融合AI元素的现代用户界面设计，展现科技感与未来感',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20UI%20design%20with%20AI%20elements%2C%20futuristic%20technology%20style%2C%20clean%20interface%2C%20blue%20and%20purple%20color%20scheme&image_size=landscape_16_9',
     tags: ['UI设计', '科技感', '未来风']
   },
   {
+    id: 2,
     title: '智能产品包装设计',
     description: 'AI生成的产品包装设计，结合品牌元素与现代审美',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=product%20packaging%20design%20generated%20by%20AI%2C%20modern%20aesthetic%2C%20clean%20lines%2C%20vibrant%20colors&image_size=landscape_16_9',
     tags: ['包装设计', '品牌设计', '现代风格']
   },
   {
+    id: 3,
     title: '数字艺术创作',
     description: 'AI辅助创作的数字艺术作品，展现独特的视觉风格',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=digital%20art%20creation%20with%20AI%20assistance%2C%20unique%20visual%20style%2C%20abstract%20elements%2C%20vibrant%20colors&image_size=landscape_16_9',
     tags: ['数字艺术', 'AI创作', '抽象风格']
   },
   {
+    id: 4,
     title: '品牌标识设计',
     description: 'AI生成的品牌标识设计，简洁有力，易于识别',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=brand%20logo%20design%20generated%20by%20AI%2C%20clean%20and%20powerful%2C%20easy%20to%20recognize%2C%20modern%20style&image_size=landscape_16_9',
     tags: ['标志设计', '品牌识别', '简洁风格']
   },
   {
+    id: 5,
     title: '营销海报设计',
     description: 'AI辅助创作的营销海报，吸引眼球，传达核心信息',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=marketing%20poster%20design%20with%20AI%20assistance%2C%20eye-catching%2C%20core%20message%20delivery%2C%20vibrant%20colors&image_size=landscape_16_9',
     tags: ['海报设计', '营销设计', '视觉传达']
   },
   {
+    id: 6,
     title: '网页界面设计',
     description: 'AI生成的网页界面设计，用户友好，视觉吸引力强',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=web%20interface%20design%20generated%20by%20AI%2C%20user-friendly%2C%20visually%20appealing%2C%20modern%20layout&image_size=landscape_16_9',
@@ -272,6 +291,7 @@ const processSteps = ref([
   box-shadow: 
     0 10px 30px rgba(0, 0, 0, 0.3),
     0 0 20px var(--primary-glow);
+  cursor: pointer;
 }
 
 .design-card:hover {

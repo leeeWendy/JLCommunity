@@ -34,7 +34,7 @@
     <section class="products-section">
       <h2 class="section-title">AI短视频产品</h2>
       <div class="products-grid">
-        <div class="product-card" v-for="(product, index) in products" :key="index">
+        <div class="product-card" v-for="(product, index) in products" :key="product.id" @click="navigateToDetail(product.id)">
           <div class="product-card-inner">
             <div class="product-image-container">
               <div class="product-image" :style="{ backgroundImage: `url(${product.image})` }"></div>
@@ -125,28 +125,40 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// 导航到详情页
+const navigateToDetail = (id) => {
+  router.push(`/ai-short-video/product/${id}`)
+}
 
 // 产品数据
 const products = ref([
   {
+    id: 1,
     name: 'AI创意短片',
     description: '根据文字描述自动生成创意短片，包含场景、角色和情节。',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=AI%20short%20video%20creation%20interface%20with%20modern%20design%2C%20dark%20theme%2C%20futuristic%20elements&image_size=landscape_16_9',
     features: ['智能脚本', '自动分镜', '创意生成']
   },
   {
+    id: 2,
     name: 'AI营销视频',
     description: '为产品和品牌快速制作专业的营销推广视频。',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=AI%20marketing%20video%20generator%20with%20product%20showcase%2C%20dark%20background%2C%20modern%20UI&image_size=landscape_16_9',
     features: ['品牌定制', '产品展示', '营销模板']
   },
   {
+    id: 3,
     name: 'AI短视频剪辑',
     description: '智能剪辑工具，自动处理视频素材，生成高质量成片。',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=AI%20video%20editing%20software%20interface%2C%20timeline%2C%20effects%20panel%2C%20dark%20theme&image_size=landscape_16_9',
     features: ['自动剪辑', '智能转场', '特效添加']
   },
   {
+    id: 4,
     name: 'AI字幕生成',
     description: '自动识别视频语音，生成精准字幕，支持多语言翻译。',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=AI%20subtitle%20generator%20interface%2C%20text%20recognition%2C%20language%20translation%2C%20dark%20theme&image_size=landscape_16_9',
