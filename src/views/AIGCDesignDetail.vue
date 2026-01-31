@@ -15,6 +15,19 @@
         </div>
         
         <div class="design-info-detail">
+          <div class="detail-header-actions">
+            <button 
+              class="detail-like-button" 
+              :class="{ 'liked': design?.liked }"
+              @click="handleLike"
+            >
+              <svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span>{{ design?.liked ? '已收藏' : '收藏' }}</span>
+              <span class="like-count">({{ design?.likeCount }})</span>
+            </button>
+          </div>
           <h2 class="design-title-detail">{{ design?.title }}</h2>
           <p class="design-description-detail">{{ design?.description }}</p>
           
@@ -86,12 +99,32 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { toggleLike, initializeLikeCount, isLiked } from '../utils/likes'
 
 const router = useRouter()
 const route = useRoute()
 const designId = route.params.id
+
+const handleLike = () => {
+  const result = toggleLike(`aigc-design-${designId}`)
+  if (currentDesign.value) {
+    currentDesign.value.likeCount = result.count
+    currentDesign.value.liked = result.liked
+  }
+}
+
+const getDesignStyle = (tags) => {
+  if (!tags) return ''
+  return tags.join('、')
+}
+
+const currentDesign = ref({
+  id: parseInt(designId),
+  likeCount: initializeLikeCount(`aigc-design-${designId}`, Math.floor(Math.random() * 100) + 20),
+  liked: isLiked(`aigc-design-${designId}`)
+})
 
 // 设计作品数据
 const designs = ref([
@@ -139,9 +172,13 @@ const designs = ref([
   }
 ])
 
-// 当前设计作品
 const design = computed(() => {
-  return designs.value.find(d => d.id === parseInt(designId))
+  const d = designs.value.find(d => d.id === parseInt(designId))
+  if (d) {
+    d.likeCount = currentDesign.value.likeCount
+    d.liked = currentDesign.value.liked
+  }
+  return d
 })
 
 // 相关作品
@@ -157,12 +194,6 @@ const goBack = () => {
 // 导航到详情页
 const navigateToDetail = (id) => {
   router.push(`/aigc/design/${id}`)
-}
-
-// 获取设计风格
-const getDesignStyle = (tags) => {
-  if (!tags) return ''
-  return tags.join('、')
 }
 </script>
 
@@ -263,6 +294,58 @@ const getDesignStyle = (tags) => {
   box-shadow: 
     0 15px 50px rgba(0, 0, 0, 0.4),
     0 0 30px var(--primary-glow);
+}
+
+.detail-header-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.detail-like-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 15, 35, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.detail-like-button:hover {
+  background: rgba(15, 15, 35, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.detail-like-button.liked {
+  background: rgba(255, 100, 100, 0.15);
+  border-color: rgba(255, 100, 100, 0.3);
+  color: #ff6b6b;
+}
+
+.detail-like-button.liked .heart-icon {
+  fill: #ff6b6b;
+  stroke: #ff6b6b;
+}
+
+.detail-like-button .heart-icon {
+  width: 16px;
+  height: 16px;
+  stroke: rgba(255, 255, 255, 0.6);
+  fill: transparent;
+  transition: all 0.2s ease;
+}
+
+.detail-like-button .like-count {
+  font-size: 12px;
+  opacity: 0.9;
 }
 
 .design-title-detail {

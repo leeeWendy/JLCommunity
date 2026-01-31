@@ -36,6 +36,16 @@
       <div class="products-grid">
         <div class="product-card" v-for="(product, index) in products" :key="product.id" @click="navigateToDetail(product.id)">
           <div class="product-card-inner">
+            <button 
+              class="product-like-button" 
+              :class="{ 'liked': product.liked }"
+              @click.stop="handleLike(product)"
+            >
+              <svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span class="like-count">{{ product.likeCount }}</span>
+            </button>
             <div class="product-image-container">
               <div class="product-image" :style="{ backgroundImage: `url(${product.image})` }"></div>
               <div class="product-overlay">
@@ -126,45 +136,64 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { toggleLike, initializeLikeCount, isLiked } from '../utils/likes'
 
 const router = useRouter()
 
-// 导航到详情页
 const navigateToDetail = (id) => {
   router.push(`/ai-short-video/product/${id}`)
 }
 
-// 产品数据
+const handleLike = (product) => {
+  const result = toggleLike(`ai-short-video-${product.id}`)
+  product.likeCount = result.count
+  product.liked = result.liked
+}
+
 const products = ref([
   {
     id: 1,
     name: 'AI创意短片',
     description: '根据文字描述自动生成创意短片，包含场景、角色和情节。',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=AI%20short%20video%20creation%20interface%20with%20modern%20design%2C%20dark%20theme%2C%20futuristic%20elements&image_size=landscape_16_9',
-    features: ['智能脚本', '自动分镜', '创意生成']
+    features: ['智能脚本', '自动分镜', '创意生成'],
+    likeCount: 0,
+    liked: false
   },
   {
     id: 2,
     name: 'AI营销视频',
     description: '为产品和品牌快速制作专业的营销推广视频。',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=AI%20marketing%20video%20generator%20with%20product%20showcase%2C%20dark%20background%2C%20modern%20UI&image_size=landscape_16_9',
-    features: ['品牌定制', '产品展示', '营销模板']
+    features: ['品牌定制', '产品展示', '营销模板'],
+    likeCount: 0,
+    liked: false
   },
   {
     id: 3,
     name: 'AI短视频剪辑',
     description: '智能剪辑工具，自动处理视频素材，生成高质量成片。',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=AI%20video%20editing%20software%20interface%2C%20timeline%2C%20effects%20panel%2C%20dark%20theme&image_size=landscape_16_9',
-    features: ['自动剪辑', '智能转场', '特效添加']
+    features: ['自动剪辑', '智能转场', '特效添加'],
+    likeCount: 0,
+    liked: false
   },
   {
     id: 4,
     name: 'AI字幕生成',
     description: '自动识别视频语音，生成精准字幕，支持多语言翻译。',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=AI%20subtitle%20generator%20interface%2C%20text%20recognition%2C%20language%20translation%2C%20dark%20theme&image_size=landscape_16_9',
-    features: ['语音识别', '多语言支持', '字幕样式']
+    features: ['语音识别', '多语言支持', '字幕样式'],
+    likeCount: 0,
+    liked: false
   }
 ])
+
+products.value = products.value.map(product => ({
+  ...product,
+  likeCount: initializeLikeCount(`ai-short-video-${product.id}`, Math.floor(Math.random() * 100) + 20),
+  liked: isLiked(`ai-short-video-${product.id}`)
+}))
 </script>
 
 <style scoped>
@@ -313,6 +342,59 @@ const products = ref([
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.product-like-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 15, 35, 0.8);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+
+.product-like-button:hover {
+  background: rgba(15, 15, 35, 0.95);
+  transform: scale(1.05);
+}
+
+.product-like-button.liked {
+  background: rgba(255, 100, 100, 0.2);
+  border-color: #ff6b6b;
+}
+
+.product-like-button.liked .heart-icon {
+  fill: #ff6b6b;
+  stroke: #ff6b6b;
+  transform: scale(1.1);
+}
+
+.product-like-button .heart-icon {
+  width: 18px;
+  height: 18px;
+  stroke: rgba(255, 255, 255, 0.7);
+  fill: transparent;
+  transition: all 0.3s ease;
+}
+
+.product-like-button .like-count {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  min-width: 20px;
+  text-align: left;
+}
+
+.product-like-button.liked .like-count {
+  color: #ff6b6b;
 }
 
 .product-card:hover .product-card-inner {

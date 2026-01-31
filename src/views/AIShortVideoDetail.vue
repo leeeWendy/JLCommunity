@@ -15,6 +15,19 @@
         </div>
         
         <div class="product-info-detail">
+          <div class="detail-header-actions">
+            <button 
+              class="detail-like-button" 
+              :class="{ 'liked': product?.liked }"
+              @click="handleLike"
+            >
+              <svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span>{{ product?.liked ? '已收藏' : '收藏' }}</span>
+              <span class="like-count">({{ product?.likeCount }})</span>
+            </button>
+          </div>
           <h2 class="product-name-detail">{{ product?.name }}</h2>
           <p class="product-description-detail">{{ product?.description }}</p>
           
@@ -100,10 +113,38 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { toggleLike, initializeLikeCount, isLiked } from '../utils/likes'
 
 const router = useRouter()
 const route = useRoute()
 const productId = route.params.id
+
+const handleLike = () => {
+  const result = toggleLike(`ai-short-video-${productId}`)
+  if (currentProduct.value) {
+    currentProduct.value.likeCount = result.count
+    currentProduct.value.liked = result.liked
+  }
+}
+
+const getUseCases = (productName) => {
+  if (!productName) return ''
+  
+  const useCasesMap = {
+    'AI创意短片': '创意内容、故事讲述、个人创作',
+    'AI营销视频': '品牌推广、产品介绍、活动宣传',
+    'AI短视频剪辑': '视频处理、内容制作、快速编辑',
+    'AI字幕生成': '视频字幕、多语言翻译、内容无障碍'
+  }
+  
+  return useCasesMap[productName] || '多种场景适用'
+}
+
+const currentProduct = ref({
+  id: parseInt(productId),
+  likeCount: initializeLikeCount(`ai-short-video-${productId}`, Math.floor(Math.random() * 100) + 20),
+  liked: isLiked(`ai-short-video-${productId}`)
+})
 
 // 产品数据
 const products = ref([
@@ -137,9 +178,13 @@ const products = ref([
   }
 ])
 
-// 当前产品
 const product = computed(() => {
-  return products.value.find(p => p.id === parseInt(productId))
+  const p = products.value.find(p => p.id === parseInt(productId))
+  if (p) {
+    p.likeCount = currentProduct.value.likeCount
+    p.liked = currentProduct.value.liked
+  }
+  return p
 })
 
 // 相关产品
@@ -155,20 +200,6 @@ const goBack = () => {
 // 导航到详情页
 const navigateToDetail = (id) => {
   router.push(`/ai-short-video/product/${id}`)
-}
-
-// 获取适用场景
-const getUseCases = (productName) => {
-  if (!productName) return ''
-  
-  const useCasesMap = {
-    'AI创意短片': '创意内容、故事讲述、个人创作',
-    'AI营销视频': '品牌推广、产品介绍、活动宣传',
-    'AI短视频剪辑': '视频处理、内容制作、快速编辑',
-    'AI字幕生成': '视频字幕、多语言翻译、内容无障碍'
-  }
-  
-  return useCasesMap[productName] || '多种场景适用'
 }
 </script>
 
@@ -271,6 +302,58 @@ const getUseCases = (productName) => {
   box-shadow: 
     0 15px 50px rgba(0, 0, 0, 0.4),
     0 0 30px var(--primary-glow);
+}
+
+.detail-header-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.detail-like-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 15, 35, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.detail-like-button:hover {
+  background: rgba(15, 15, 35, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.detail-like-button.liked {
+  background: rgba(255, 100, 100, 0.15);
+  border-color: rgba(255, 100, 100, 0.3);
+  color: #ff6b6b;
+}
+
+.detail-like-button.liked .heart-icon {
+  fill: #ff6b6b;
+  stroke: #ff6b6b;
+}
+
+.detail-like-button .heart-icon {
+  width: 16px;
+  height: 16px;
+  stroke: rgba(255, 255, 255, 0.6);
+  fill: transparent;
+  transition: all 0.2s ease;
+}
+
+.detail-like-button .like-count {
+  font-size: 12px;
+  opacity: 0.9;
 }
 
 .product-name-detail {

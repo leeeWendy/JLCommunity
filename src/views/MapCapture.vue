@@ -353,6 +353,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 导入像素字体 */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 /* 全局样式 */
 .map-capture {
   max-width: 1200px;
@@ -781,9 +784,6 @@ onMounted(() => {
     max-width: 300px;
   }
 }
-
-/* 导入像素字体 */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 /* 应用像素字体 */
 .page-title,

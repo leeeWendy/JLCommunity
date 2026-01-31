@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTS音频播放测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        .log {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>TTS音频播放测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 浏览器音频播放测试</h2>
+        <p>测试浏览器是否能播放简单的音频</p>
+        <button onclick="testBasicAudio()">测试基本音频播放</button>
+        <div id="basic-audio-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 本地TTS服务测试</h2>
+        <p>测试从本地TTS服务获取并播放音频</p>
+        <button onclick="testLocalTTS()">测试本地TTS服务</button>
+        <div id="local-tts-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 音频权限测试</h2>
+        <p>测试浏览器音频播放权限</p>
+        <button onclick="testAudioPermission()">测试音频权限</button>
+        <div id="permission-log" class="log"></div>
+    </div>
+
+    <script>
+        // 日志函数
+        function log(id, message) {
+            const logDiv = document.getElementById(id);
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        // 测试基本音频播放
+        function testBasicAudio() {
+            const logId = 'basic-audio-log';
+            log(logId, '开始测试基本音频播放...');
+            
+            // 创建一个简单的音频上下文
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                log(logId, '✓ 音频上下文创建成功');
+                
+                // 创建一个 oscillator
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 440; // A4
+                gainNode.gain.value = 0.1; // 降低音量
+                
+                oscillator.start();
+                log(logId, '✓ 音频播放开始');
+                
+                // 1秒后停止
+                setTimeout(() => {
+                    oscillator.stop();
+                    log(logId, '✓ 音频播放停止');
+                }, 1000);
+                
+            } catch (error) {
+                log(logId, `✗ 错误: ${error.message}`);
+            }
+        }
+        
+        // 测试本地TTS服务
+        async function testLocalTTS() {
+            const logId = 'local-tts-log';
+            log(logId, '开始测试本地TTS服务...');
+            
+            try {
+                const ttsUrl = 'http://localhost:5001/api/tts';
+                log(logId, `调用TTS服务: ${ttsUrl}`);
+                
+                const response = await fetch(ttsUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        text: '这是一个测试音频，用于验证浏览器是否能正确播放本地TTS服务生成的音频。',
+                        voice_id: 115 // Reed 中文男声
+                    })
+                });
+                
+                log(logId, `响应状态: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`TTS服务错误: ${response.status} ${response.statusText}`);
+                }
+                
+                const audioBlob = await response.blob();
+                log(logId, `音频数据获取成功，大小: ${audioBlob.size} 字节`);
+                log(logId, `音频类型: ${audioBlob.type}`);
+                
+                if (audioBlob.size === 0) {
+                    throw new Error('获取到的音频数据为空');
+                }
+                
+                // 创建音频元素
+                const audio = new Audio();
+                const url = URL.createObjectURL(audioBlob);
+                audio.src = url;
+                log(logId, '音频元素创建成功');
+                
+                // 播放音频
+                audio.onplay = () => {
+                    log(logId, '✓ 音频播放开始');
+                };
+                
+                audio.onended = () => {
+                    log(logId, '✓ 音频播放结束');
+                    URL.revokeObjectURL(url);
+                };
+                
+                audio.onerror = (event) => {
+                    log(logId, `✗ 音频播放错误: ${event.target.error ? event.target.error.code : '未知'}`);
+                    URL.revokeObjectURL(url);
+                };
+                
+                await audio.play();
+                log(logId, '音频播放命令已发送');
+                
+            } catch (error) {
+                log(logId, `✗ 错误: ${error.message}`);
+                log(logId, `错误详情: ${error.stack}`);
+            }
+        }
+        
+        // 测试音频权限
+        function testAudioPermission() {
+            const logId = 'permission-log';
+            log(logId, '开始测试音频权限...');
+            
+            if ('permissions' in navigator) {
+                navigator.permissions.query({ name: 'microphone' }).then(permissionStatus => {
+                    log(logId, `麦克风权限状态: ${permissionStatus.state}`);
+                }).catch(error => {
+                    log(logId, `获取麦克风权限错误: ${error.message}`);
+                });
+            } else {
+                log(logId, '浏览器不支持Permissions API');
+            }
+            
+            // 测试音频上下文状态
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                log(logId, `音频上下文状态: ${audioContext.state}`);
+                
+                if (audioContext.state === 'suspended') {
+                    log(logId, '音频上下文被挂起，需要用户交互才能恢复');
+                    // 尝试恢复
+                    audioContext.resume().then(() => {
+                        log(logId, '✓ 音频上下文恢复成功');
+                    }).catch(error => {
+                        log(logId, `✗ 恢复音频上下文错误: ${error.message}`);
+                    });
+                } else {
+                    log(logId, '✓ 音频上下文状态正常');
+                }
+            } catch (error) {
+                log(logId, `✗ 创建音频上下文错误: ${error.message}`);
+            }
+        }
+        
+        // 页面加载时的基本检查
+        window.onload = function() {
+            console.log('TTS测试页面加载完成');
+            console.log('浏览器信息:', navigator.userAgent);
+            console.log('是否支持AudioContext:', typeof (window.AudioContext || window.webkitAudioContext) !== 'undefined');
+            console.log('是否支持fetch:', typeof fetch !== 'undefined');
+        };
+    </script>
+</body>
+</html>

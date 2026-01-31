@@ -85,7 +85,6 @@ const initScene = () => {
   try {
     // 创建场景
     scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x1a1a3a)
     
     // 添加环境光
     const ambientLight = new THREE.AmbientLight(0xf5d7db, 0.9)
@@ -993,7 +992,6 @@ onUnmounted(() => {
   position: relative;
   overflow: hidden;
   border-radius: 12px;
-  background: var(--primary-gradient);
   opacity: 1;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   cursor: grab;

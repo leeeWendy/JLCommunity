@@ -94,6 +94,10 @@
     <main class="main">
       <router-view />
     </main>
+    
+    <!-- 聊天机器人 -->
+    <chat-bot />
+    
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-logo-container">
@@ -126,6 +130,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import ChatBot from './components/ChatBot.vue'
 
 // 主题管理
 const showThemeMenu = ref(false)

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本地TTS服务测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 100px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            flex: 1;
+        }
+        .play-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .stop-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>本地TTS服务测试</h1>
+        
+        <div class="form-group">
+            <label for="text">输入文本：</label>
+            <textarea id="text" placeholder="请输入要转换为语音的文本...">你好！欢迎来到聚灵OPC社区！我是你的智能助手，随时为你解答关于三维资产、AIGC设计、摄影航拍、AI短视频或虚拟社区体验等方面的问题。有什么可以帮你的吗？</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="voice">选择语音：</label>
+            <select id="voice">
+                <option value="29">Eddy (中文男声)</option>
+                <option value="44">Flo (中文女声)</option>
+                <option value="60">Grandma (中文女声)</option>
+                <option value="74">Grandpa (中文男声)</option>
+                <option value="93">Meijia (中文女声)</option>
+                <option value="115">Reed (中文男声)</option>
+                <option value="130">Rocko (中文男声)</option>
+                <option value="145">Sandy (中文女声)</option>
+                <option value="161">Shelley (中文女声)</option>
+                <option value="167">Tingting (中文女声)</option>
+            </select>
+        </div>
+        
+        <div class="button-group">
+            <button class="play-btn" onclick="playTTS()">播放语音</button>
+            <button class="stop-btn" onclick="stopTTS()">停止播放</button>
+        </div>
+        
+        <div id="status" class="status">
+            准备就绪，请输入文本并点击播放按钮。
+        </div>
+    </div>
+    
+    <script>
+        let audio = null;
+        
+        function updateStatus(message, isError = false) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = isError ? 'status error' : 'status success';
+        }
+        
+        function playTTS() {
+            const text = document.getElementById('text').value;
+            const voiceId = document.getElementById('voice').value;
+            
+            if (!text.trim()) {
+                updateStatus('请输入文本', true);
+                return;
+            }
+            
+            updateStatus('正在生成语音...');
+            
+            // 停止之前的音频
+            if (audio) {
+                audio.pause();
+                audio = null;
+            }
+            
+            // 调用本地TTS服务
+            fetch('http://localhost:5001/api/tts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    text: text,
+                    voice_id: parseInt(voiceId)
+                })
+            })
+            .then(response => {
+                console.log('响应状态:', response.status, response.statusText);
+                console.log('响应头:', Object.fromEntries(response.headers.entries()));
+                
+                if (!response.ok) {
+                    throw new Error(`TTS服务错误: ${response.status} ${response.statusText}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                console.log('获取到的音频Blob:', blob);
+                console.log('Blob类型:', blob.type);
+                console.log('Blob大小:', blob.size, '字节');
+                
+                // 检查Blob是否有效
+                if (!blob || blob.size === 0) {
+                    throw new Error('获取到的音频数据为空');
+                }
+                
+                updateStatus('语音生成成功，正在播放...');
+                
+                // 创建音频元素
+                audio = new Audio();
+                
+                // 监听音频元素的所有事件
+                audio.addEventListener('loadstart', () => console.log('音频加载开始'));
+                audio.addEventListener('loadedmetadata', () => console.log('音频元数据加载完成'));
+                audio.addEventListener('loadeddata', () => console.log('音频数据加载完成'));
+                audio.addEventListener('canplay', () => console.log('音频可以播放'));
+                audio.addEventListener('canplaythrough', () => console.log('音频可以完全播放'));
+                audio.addEventListener('play', () => console.log('音频开始播放'));
+                audio.addEventListener('playing', () => console.log('音频正在播放'));
+                audio.addEventListener('pause', () => console.log('音频暂停'));
+                audio.addEventListener('ended', () => console.log('音频播放结束'));
+                audio.addEventListener('error', (event) => {
+                    console.error('音频错误:', event);
+                    console.error('错误代码:', event.target.error.code);
+                    console.error('错误消息:', event.target.error.message);
+                });
+                
+                // 创建URL并设置为音频源
+                const url = URL.createObjectURL(blob);
+                console.log('创建的音频URL:', url);
+                audio.src = url;
+                
+                // 播放音频
+                audio.play().then(() => {
+                    console.log('音频播放请求成功');
+                    updateStatus('语音播放中...');
+                }).catch(error => {
+                    console.error('音频播放请求失败:', error);
+                    updateStatus(`播放失败: ${error.message}`, true);
+                    audio = null;
+                });
+                
+                // 监听播放结束
+                audio.addEventListener('ended', () => {
+                    updateStatus('语音播放完成');
+                    audio = null;
+                });
+                
+                // 监听播放错误
+                audio.addEventListener('error', () => {
+                    updateStatus('音频播放错误', true);
+                    audio = null;
+                });
+            })
+            .catch(error => {
+                console.error('TTS错误:', error);
+                updateStatus(`错误: ${error.message}`, true);
+            });
+        }
+        
+        function stopTTS() {
+            if (audio) {
+                audio.pause();
+                audio = null;
+                updateStatus('播放已停止');
+            } else {
+                updateStatus('没有正在播放的音频', true);
+            }
+        }
+    </script>
+</body>
+</html>

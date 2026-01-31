@@ -8,8 +8,9 @@
             :key="index"
             :to="web.path"
             class="web-card"
-            @mouseenter="hoveredWeb = index"
-            @mouseleave="hoveredWeb = null"
+            @mouseenter="handleMouseEnter(index, $event)"
+            @mouseleave="handleMouseLeave($event)"
+            :ref="el => webCards[index] = el"
           >
             <div class="web-card-inner">
               <div class="web-preview">
@@ -21,41 +22,55 @@
       </div>
       
       <!-- 悬浮的信息显示控件 -->
-      <div v-if="hoveredWeb !== null" class="web-info-overlay">
+      <div 
+        v-if="hoveredWeb !== null" 
+        class="web-info-overlay"
+        :ref="el => { if (el) handleInfoShow(el) }"
+      >
         <div class="web-info-content">
           <h3 class="web-info-name">{{ webItems[hoveredWeb].name }}</h3>
           <p class="web-info-description">{{ webItems[hoveredWeb].description }}</p>
         </div>
       </div>
     </section>
+    
+
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+// 使用全局的 anime 变量 (通过 CDN 引入)
 
-// 窗口宽度响应式
 const windowWidth = ref(window.innerWidth)
+const webCards = ref([])
+const hoveredWeb = ref(null)
 
-// 监听窗口大小变化
 const handleResize = () => {
   windowWidth.value = window.innerWidth
 }
 
 onMounted(() => {
   window.addEventListener('resize', handleResize)
+  
+  // 页面加载动画
+  anime({
+    targets: '.web-card',
+    opacity: [0, 1],
+    translateY: [50, 0],
+    duration: 800,
+    delay: anime.stagger(100),
+    easing: 'easeOutElastic'
+  })
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
 
-// 计算图标大小，根据窗口宽度动态调整
 const iconSize = computed(() => {
-  // 基础大小
   let baseSize = 80
   
-  // 根据窗口宽度调整
   if (windowWidth.value < 480) {
     baseSize = 50
   } else if (windowWidth.value < 768) {
@@ -69,7 +84,6 @@ const iconSize = computed(() => {
   return baseSize
 })
 
-// 网页图标数据
 const webItems = ref([
   {
     name: 'AIGC设计',
@@ -94,10 +108,90 @@ const webItems = ref([
     description: '沉浸式虚拟社区体验，连接全球用户，共享创意与灵感',
     path: '/virtual-community',
     icon: '🌐'
+  },
+  {
+    name: 'Anime测试',
+    description: 'Anime.js 动画效果测试页面，展示各种动画功能',
+    path: '/anime-test',
+    icon: '✨'
   }
 ])
 
-const hoveredWeb = ref(null)
+// 卡片鼠标悬停效果
+const handleMouseEnter = (index, event) => {
+  hoveredWeb.value = index
+  const card = event.currentTarget
+  
+  // 卡片悬停动画
+  anime({
+    targets: card,
+    translateY: -15,
+    duration: 300,
+    easing: 'easeOutQuad'
+  })
+  
+  // 卡片内部动画
+  anime({
+    targets: card.querySelector('.web-card-inner'),
+    boxShadow: [
+      '0 15px 50px var(--primary-glow), 0 0 30px var(--secondary-glow)',
+      '0 25px 80px var(--primary-glow), 0 0 50px var(--secondary-glow)'
+    ],
+    duration: 300,
+    easing: 'easeOutQuad'
+  })
+  
+  // 图标动画
+  anime({
+    targets: card.querySelector('.web-icon'),
+    scale: 1.2,
+    rotate: 10,
+    duration: 300,
+    easing: 'easeOutQuad'
+  })
+}
+
+// 卡片鼠标离开效果
+const handleMouseLeave = (event) => {
+  hoveredWeb.value = null
+  const card = event.currentTarget
+  
+  // 卡片恢复动画
+  anime({
+    targets: card,
+    translateY: 0,
+    duration: 300,
+    easing: 'easeOutQuad'
+  })
+  
+  // 卡片内部恢复动画
+  anime({
+    targets: card.querySelector('.web-card-inner'),
+    boxShadow: '0 15px 50px var(--primary-glow), 0 0 30px var(--secondary-glow)',
+    duration: 300,
+    easing: 'easeOutQuad'
+  })
+  
+  // 图标恢复动画
+  anime({
+    targets: card.querySelector('.web-icon'),
+    scale: 1,
+    rotate: 0,
+    duration: 300,
+    easing: 'easeOutQuad'
+  })
+}
+
+// 信息面板动画
+const handleInfoShow = (infoElement) => {
+  anime({
+    targets: infoElement,
+    opacity: [0, 1],
+    translateY: [20, 0],
+    duration: 300,
+    easing: 'easeOutQuad'
+  })
+}
 </script>
 
 <style scoped>

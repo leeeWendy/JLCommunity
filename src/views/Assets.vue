@@ -73,26 +73,13 @@
           v-for="model in models" 
           :key="model.id"
           class="model-card"
-          @mouseenter="hoveredModel = model.id"
-          @mouseleave="hoveredModel = null"
+          @click="viewModel(model.id)"
         >
           <div class="model-card-inner">
             <div class="model-preview">
               <div class="model-preview-container">
                 <ModelViewer :model-url="model.url" />
                 <div class="model-preview-glow"></div>
-              </div>
-              <div class="model-overlay">
-                <button class="overlay-btn" @click="viewModel(model.id)">
-                  <span class="overlay-btn-icon">👁️</span>
-                  <span class="overlay-btn-text">查看</span>
-                  <div class="overlay-btn-glow"></div>
-                </button>
-                <button class="overlay-btn" @click="downloadModel(model.id)">
-                  <span class="overlay-btn-icon">💾</span>
-                  <span class="overlay-btn-text">下载</span>
-                  <div class="overlay-btn-glow"></div>
-                </button>
               </div>
             </div>
             <div class="model-info">
@@ -636,6 +623,7 @@ const downloadModel = (modelId) => {
 .model-card {
   perspective: 1000px;
   height: 100%;
+  cursor: pointer;
 }
 
 .model-card-inner {
@@ -647,7 +635,6 @@ const downloadModel = (modelId) => {
   background: var(--card-bg);
   backdrop-filter: blur(20px);
   border-radius: 24px;
-  border: 1px solid var(--border-color);
   overflow: hidden;
   box-shadow: 
     0 10px 40px rgba(0, 0, 0, 0.3),
@@ -659,7 +646,6 @@ const downloadModel = (modelId) => {
   box-shadow: 
     0 25px 70px var(--primary-glow),
     0 0 40px var(--secondary-glow);
-  border-color: var(--border-color);
 }
 
 .model-preview {
@@ -702,81 +688,6 @@ const downloadModel = (modelId) => {
   50% {
     opacity: 0.3;
   }
-}
-
-.model-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--card-bg);
-  backdrop-filter: blur(15px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 25px;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  border-top: 1px solid var(--border-color);
-}
-
-.model-card:hover .model-overlay {
-  opacity: 1;
-}
-
-.overlay-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 28px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  position: relative;
-  overflow: hidden;
-}
-
-.overlay-btn:hover {
-  background: var(--primary-glow);
-  border-color: var(--border-color);
-  transform: translateY(-3px);
-  box-shadow: 
-    0 10px 30px var(--primary-glow),
-    0 0 20px var(--secondary-glow);
-}
-
-.overlay-btn-icon {
-  font-size: 18px;
-  transition: transform 0.3s ease;
-}
-
-.overlay-btn:hover .overlay-btn-icon {
-  transform: scale(1.1);
-}
-
-.overlay-btn-glow {
-  position: absolute;
-  top: -5px;
-  left: -5px;
-  right: -5px;
-  bottom: -5px;
-  background: var(--primary-gradient);
-  filter: blur(15px);
-  opacity: 0;
-  z-index: -1;
-  border-radius: 20px;
-  transition: opacity 0.3s ease;
-}
-
-.overlay-btn:hover .overlay-btn-glow {
-  opacity: 0.3;
 }
 
 .model-info {

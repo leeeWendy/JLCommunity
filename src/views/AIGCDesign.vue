@@ -46,6 +46,16 @@
             :key="design.id"
             @click="navigateToDetail(design.id)"
           >
+            <button 
+              class="design-like-button" 
+              :class="{ 'liked': design.liked }"
+              @click.stop="handleLike(design)"
+            >
+              <svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span class="like-count">{{ design.likeCount }}</span>
+            </button>
             <div class="design-preview">
               <img :src="design.image" :alt="design.title" class="design-image">
             </div>
@@ -76,61 +86,83 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { toggleLike, initializeLikeCount, isLiked } from '../utils/likes'
 
 const router = useRouter()
 
-// 导航到详情页
 const navigateToDetail = (id) => {
   router.push(`/aigc/design/${id}`)
 }
 
-// 设计作品数据
+const handleLike = (design) => {
+  const result = toggleLike(`aigc-design-${design.id}`)
+  design.likeCount = result.count
+  design.liked = result.liked
+}
+
 const designs = ref([
   {
     id: 1,
     title: '未来科技风格UI设计',
     description: '融合AI元素的现代用户界面设计，展现科技感与未来感',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20UI%20design%20with%20AI%20elements%2C%20futuristic%20technology%20style%2C%20clean%20interface%2C%20blue%20and%20purple%20color%20scheme&image_size=landscape_16_9',
-    tags: ['UI设计', '科技感', '未来风']
+    tags: ['UI设计', '科技感', '未来风'],
+    likeCount: 0,
+    liked: false
   },
   {
     id: 2,
     title: '智能产品包装设计',
     description: 'AI生成的产品包装设计，结合品牌元素与现代审美',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=product%20packaging%20design%20generated%20by%20AI%2C%20modern%20aesthetic%2C%20clean%20lines%2C%20vibrant%20colors&image_size=landscape_16_9',
-    tags: ['包装设计', '品牌设计', '现代风格']
+    tags: ['包装设计', '品牌设计', '现代风格'],
+    likeCount: 0,
+    liked: false
   },
   {
     id: 3,
     title: '数字艺术创作',
     description: 'AI辅助创作的数字艺术作品，展现独特的视觉风格',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=digital%20art%20creation%20with%20AI%20assistance%2C%20unique%20visual%20style%2C%20abstract%20elements%2C%20vibrant%20colors&image_size=landscape_16_9',
-    tags: ['数字艺术', 'AI创作', '抽象风格']
+    tags: ['数字艺术', 'AI创作', '抽象风格'],
+    likeCount: 0,
+    liked: false
   },
   {
     id: 4,
     title: '品牌标识设计',
     description: 'AI生成的品牌标识设计，简洁有力，易于识别',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=brand%20logo%20design%20generated%20by%20AI%2C%20clean%20and%20powerful%2C%20easy%20to%20recognize%2C%20modern%20style&image_size=landscape_16_9',
-    tags: ['标志设计', '品牌识别', '简洁风格']
+    tags: ['标志设计', '品牌识别', '简洁风格'],
+    likeCount: 0,
+    liked: false
   },
   {
     id: 5,
     title: '营销海报设计',
     description: 'AI辅助创作的营销海报，吸引眼球，传达核心信息',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=marketing%20poster%20design%20with%20AI%20assistance%2C%20eye-catching%2C%20core%20message%20delivery%2C%20vibrant%20colors&image_size=landscape_16_9',
-    tags: ['海报设计', '营销设计', '视觉传达']
+    tags: ['海报设计', '营销设计', '视觉传达'],
+    likeCount: 0,
+    liked: false
   },
   {
     id: 6,
     title: '网页界面设计',
     description: 'AI生成的网页界面设计，用户友好，视觉吸引力强',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=web%20interface%20design%20generated%20by%20AI%2C%20user-friendly%2C%20visually%20appealing%2C%20modern%20layout&image_size=landscape_16_9',
-    tags: ['网页设计', '用户体验', '现代布局']
+    tags: ['网页设计', '用户体验', '现代布局'],
+    likeCount: 0,
+    liked: false
   }
 ])
 
-// 设计流程数据
+designs.value = designs.value.map(design => ({
+  ...design,
+  likeCount: initializeLikeCount(`aigc-design-${design.id}`, Math.floor(Math.random() * 100) + 20),
+  liked: isLiked(`aigc-design-${design.id}`)
+}))
+
 const processSteps = ref([
   {
     title: '需求分析',
@@ -292,6 +324,67 @@ const processSteps = ref([
     0 10px 30px rgba(0, 0, 0, 0.3),
     0 0 20px var(--primary-glow);
   cursor: pointer;
+  position: relative;
+}
+
+.design-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 40px var(--primary-glow);
+}
+
+.design-like-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 15, 35, 0.8);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+
+.design-like-button:hover {
+  background: rgba(15, 15, 35, 0.95);
+  transform: scale(1.05);
+}
+
+.design-like-button.liked {
+  background: rgba(255, 100, 100, 0.2);
+  border-color: #ff6b6b;
+}
+
+.design-like-button.liked .heart-icon {
+  fill: #ff6b6b;
+  stroke: #ff6b6b;
+  transform: scale(1.1);
+}
+
+.design-like-button .heart-icon {
+  width: 18px;
+  height: 18px;
+  stroke: rgba(255, 255, 255, 0.7);
+  fill: transparent;
+  transition: all 0.3s ease;
+}
+
+.design-like-button .like-count {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  min-width: 20px;
+  text-align: left;
+}
+
+.design-like-button.liked .like-count {
+  color: #ff6b6b;
 }
 
 .design-card:hover {

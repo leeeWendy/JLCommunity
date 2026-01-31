@@ -53,7 +53,18 @@
       </div>
       
       <div class="showcase-grid">
-        <div class="aerial-card" v-for="(project, index) in aerialProjects" :key="index">
+        <div class="aerial-card" v-for="(project, index) in aerialProjects" :key="index" @click="goToDetail(project.id)" :class="{ 'clickable': !isManageMode }">
+          <!-- 点赞按钮 -->
+          <button 
+            class="aerial-like-button" 
+            :class="{ 'liked': project.liked }"
+            @click.stop="handleLike(project)"
+          >
+            <svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <span class="like-count">{{ project.likeCount }}</span>
+          </button>
           <div class="aerial-preview">
             <img :src="project.image" :alt="project.title" class="aerial-image">
           </div>
@@ -66,11 +77,11 @@
             
             <!-- 管理模式下的编辑删除按钮 -->
             <div v-if="isManageMode" class="aerial-actions">
-              <button class="edit-button" @click="openEditModal(project, index)">
+              <button class="edit-button" @click.stop="openEditModal(project, index)">
                 <span class="action-icon">✏️</span>
                 <span class="action-text">编辑</span>
               </button>
-              <button class="delete-button" @click="deleteProject(index)">
+              <button class="delete-button" @click.stop="deleteProject(index)">
                 <span class="action-icon">🗑️</span>
                 <span class="action-text">删除</span>
               </button>
@@ -179,6 +190,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { toggleLike, initializeLikeCount, isLiked } from '../utils/likes'
+
+const router = useRouter()
 
 // 管理模式状态
 const isManageMode = ref(false)
@@ -197,42 +212,67 @@ const formData = ref({
 // 航拍作品数据
 const aerialProjects = ref([
   {
+    id: '1',
     title: '城市天际线',
     description: '从高空俯瞰现代城市的壮丽天际线，展现城市的繁华与活力',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=urban%20skyline%20aerial%20photography%2C%20modern%20city%20buildings%2C%20sunset%20view%2C%20professional%20photography%2C%20high%20quality&image_size=landscape_16_9',
-    tags: ['城市', '天际线', '日落']
+    tags: ['城市', '天际线', '日落'],
+    likeCount: 0,
+    liked: false
   },
   {
+    id: '2',
     title: '自然风光',
     description: '航拍壮丽的自然景观，展现大自然的鬼斧神工和美丽景色',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nature%20landscape%20aerial%20photography%2C%20mountain%20range%20and%20lake%2C%20blue%20sky%2C%20professional%20photography%2C%20high%20quality&image_size=landscape_16_9',
-    tags: ['自然', '山脉', '湖泊']
+    tags: ['自然', '山脉', '湖泊'],
+    likeCount: 0,
+    liked: false
   },
   {
+    id: '3',
     title: '海岸线',
     description: '航拍蜿蜒曲折的海岸线，展现海洋与陆地的完美结合',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=coastline%20aerial%20photography%2C%20beach%20and%20ocean%2C%20blue%20water%2C%20professional%20photography%2C%20high%20quality&image_size=landscape_16_9',
-    tags: ['海岸', '海滩', '海洋']
+    tags: ['海岸', '海滩', '海洋'],
+    likeCount: 0,
+    liked: false
   },
   {
+    id: '4',
     title: '城市交通',
     description: '航拍城市交通网络，展现现代城市的繁忙与秩序',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=city%20traffic%20aerial%20photography%2C%20highway%20interchange%2C%20cars%20moving%2C%20professional%20photography%2C%20high%20quality&image_size=landscape_16_9',
-    tags: ['城市', '交通', '公路']
+    tags: ['城市', '交通', '公路'],
+    likeCount: 0,
+    liked: false
   },
   {
+    id: '5',
     title: '建筑艺术',
     description: '航拍现代建筑的独特设计，展现人类的创造力与艺术美感',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20architecture%20aerial%20photography%2C%20unique%20building%20design%2C%20geometric%20shapes%2C%20professional%20photography%2C%20high%20quality&image_size=landscape_16_9',
-    tags: ['建筑', '现代', '艺术']
+    tags: ['建筑', '现代', '艺术'],
+    likeCount: 0,
+    liked: false
   },
   {
+    id: '6',
     title: '农田风光',
     description: '航拍广阔的农田，展现大地的色彩与纹理，感受农业的魅力',
     image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=agricultural%20field%20aerial%20photography%2C%20colorful%20farmland%2C%20patterns%20and%20textures%2C%20professional%20photography%2C%20high%20quality&image_size=landscape_16_9',
-    tags: ['农田', '自然', '色彩']
+    tags: ['农田', '自然', '色彩'],
+    likeCount: 0,
+    liked: false
   }
 ])
+
+// 初始化点赞数据
+aerialProjects.value = aerialProjects.value.map(project => ({
+  ...project,
+  likeCount: initializeLikeCount(`aerial-${project.id}`, Math.floor(Math.random() * 100) + 20),
+  liked: isLiked(`aerial-${project.id}`)
+}))
 
 // 服务流程数据
 const processSteps = ref([
@@ -334,6 +374,20 @@ const deleteProject = (index) => {
   if (confirm('确定要删除这个作品吗？')) {
     aerialProjects.value.splice(index, 1)
   }
+}
+
+// 跳转到详情页
+const goToDetail = (id) => {
+  if (!isManageMode.value) {
+    router.push(`/photography-aerial/${id}`)
+  }
+}
+
+// 处理点赞
+const handleLike = (project) => {
+  const result = toggleLike(`aerial-${project.id}`)
+  project.likeCount = result.count
+  project.liked = result.liked
 }
 </script>
 
@@ -480,6 +534,68 @@ const deleteProject = (index) => {
   box-shadow: 
     0 20px 60px rgba(0, 0, 0, 0.4),
     0 0 40px var(--primary-glow);
+}
+
+.aerial-card.clickable {
+  cursor: pointer;
+}
+
+.aerial-card.clickable:hover {
+  transform: translateY(-10px) scale(1.02);
+}
+
+/* 点赞按钮样式 */
+.aerial-like-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 15, 35, 0.8);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+
+.aerial-like-button:hover {
+  background: rgba(15, 15, 35, 0.95);
+  transform: scale(1.05);
+}
+
+.aerial-like-button.liked {
+  background: rgba(255, 100, 100, 0.2);
+  border-color: #ff6b6b;
+}
+
+.aerial-like-button.liked .heart-icon {
+  fill: #ff6b6b;
+  stroke: #ff6b6b;
+  transform: scale(1.1);
+}
+
+.aerial-like-button .heart-icon {
+  width: 18px;
+  height: 18px;
+  stroke: rgba(255, 255, 255, 0.7);
+  fill: transparent;
+  transition: all 0.3s ease;
+}
+
+.aerial-like-button .like-count {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  min-width: 20px;
+  text-align: left;
+}
+
+.aerial-like-button.liked .like-count {
+  color: #ff6b6b;
 }
 
 .aerial-preview {

@@ -9,8 +9,10 @@ import AIGCDesignDetail from '../views/AIGCDesignDetail.vue'
 import AIShortVideo from '../views/AIShortVideo.vue'
 import AIShortVideoDetail from '../views/AIShortVideoDetail.vue'
 import PhotographyAerial from '../views/PhotographyAerial.vue'
+import PhotographyAerialDetail from '../views/PhotographyAerialDetail.vue'
 import MapCapture from '../views/MapCapture.vue'
 import VirtualCommunity from '../views/VirtualCommunity.vue'
+import AnimeTest from '../views/AnimeTest.vue'
 
 const routes = [
   {
@@ -67,6 +69,12 @@ const routes = [
     component: PhotographyAerial
   },
   {
+    path: '/photography-aerial/:id',
+    name: 'PhotographyAerialDetail',
+    component: PhotographyAerialDetail,
+    props: true
+  },
+  {
     path: '/map-capture',
     name: 'MapCapture',
     component: MapCapture
@@ -75,6 +83,11 @@ const routes = [
     path: '/virtual-community',
     name: 'VirtualCommunity',
     component: VirtualCommunity
+  },
+  {
+    path: '/anime-test',
+    name: 'AnimeTest',
+    component: AnimeTest
   }
 ]
 
